@@ -31,16 +31,6 @@ These encodings are solved with **QAOA (Quantum Approximate Optimization Algorit
 
 ---
 
-## 🗂️ Version History
-
-- **v1 — Initial Framework**  
-  Core QUBO and PUBO encodings with QAOA ansatz and simulation on small IEEE test cases.  
-
-- **v2 — Extended Experiments**  
-  Multiple test networks, probabilistic analysis, circuit complexity measurements, and plots of hardware efficiency vs QAOA depth.  
-
----
-
 ## 📊 Dataset & Experiment Features
 
 - **Networks**: IEEE test cases (5, 9, 14, 24, 30, 39, 57, 118 buses)  
