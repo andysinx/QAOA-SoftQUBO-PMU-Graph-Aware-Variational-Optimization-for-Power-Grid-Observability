@@ -77,7 +77,6 @@ git clone https://github.com/andysinx/qaoa-formulation-study.git
 cd qaoa-formulation-study
 pip install -r requirements.txt
 
-
 ---
 
 ## 🚀 Getting Started
