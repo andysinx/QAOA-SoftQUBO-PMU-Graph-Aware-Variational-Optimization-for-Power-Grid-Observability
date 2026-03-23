@@ -66,8 +66,7 @@ qaoa_formulation_study/
 ├── qaoa.py # QUBO/PUBO encodings + QAOA pipeline
 ├── power_system_graphs.py # Network generation and graph utilities
 ├── experiments.py # Pipelines for running probability & CX gate analysis
-├── results/ # PDF plots and experimental outputs
-└── README.md
+└── results/ # PDF plots and experimental outputs
 ```
 
 
