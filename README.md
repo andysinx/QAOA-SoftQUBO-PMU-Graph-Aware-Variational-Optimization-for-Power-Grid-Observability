@@ -54,7 +54,7 @@ These encodings are solved with **QAOA (Quantum Approximate Optimization Algorit
 ---
 
 ## 📁 Repository Structure
-
+```bash
 qaoa_formulation_study/
 │
 ├── main.py # Entry point to run experiments
@@ -63,7 +63,7 @@ qaoa_formulation_study/
 ├── experiments.py # Pipelines for running probability & CX gate analysis
 ├── results/ # PDF plots and experimental outputs
 └── README.md
-
+```
 
 
 ---
