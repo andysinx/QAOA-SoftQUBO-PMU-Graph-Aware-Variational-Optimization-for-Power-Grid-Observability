@@ -51,8 +51,7 @@ These encodings are solved with **QAOA (Quantum Approximate Optimization Algorit
 
 ### Typical Experiments:
 
-- Probability vs QAOA depth (*p*) for fixed penalty λ  
-- Impact of λ on solution quality  
+- Probability of obtain a (optimal,feasible,non-)solution in relation with QAOA depth (*p*) for a subset of penalty λ    
 - CX gate counts before and after transpilation on multiple backends  
 - Comparison of QUBO and PUBO formulations  
 
