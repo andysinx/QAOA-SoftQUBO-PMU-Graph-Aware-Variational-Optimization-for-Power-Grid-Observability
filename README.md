@@ -13,8 +13,9 @@ Key challenges include:
 - Reducing **circuit complexity** and enhancing **hardware efficiency** for near-term quantum devices.  
 
 This study emphasizes that **formulation matters more than the optimization algorithm**, exploring how better encodings allow larger networks to be tackled efficiently.
-![Sparse Graph](sparse_dense_graph.png)
-![Qaoa Architecture](qaoa_view.png)
+| Sparse Graph | QAOA Architecture |
+|-------------|------------------|
+| ![Sparse Graph](sparse_dense_graph.png) | ![QAOA Architecture](qaoa_view.png) |
 
 
 
