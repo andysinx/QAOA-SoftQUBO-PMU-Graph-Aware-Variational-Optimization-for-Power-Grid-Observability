@@ -3,9 +3,15 @@ import math
 from qiskit.quantum_info import SparsePauliOp
 from qiskit.circuit.library import QAOAAnsatz
 from qiskit_ibm_runtime import Session, EstimatorV2 as Estimator, SamplerV2 as Sampler
-from qiskit_ibm_runtime.fake_provider import FakeTorino
+from qiskit_ibm_runtime.fake_provider import FakeWashingtonV2
 from qiskit_aer.noise import NoiseModel
+from qiskit_aer import AerSimulator
 from scipy.optimize import minimize
+from evovaq.problem import Problem
+from evovaq.GeneticAlgorithm import GA
+from evovaq.HillClimbing import HC
+from evovaq.MemeticAlgorithm import MA
+import evovaq.tools.operators as op
 
 # ------------------------
 # PMU observation
@@ -118,10 +124,11 @@ def qubo_to_pauli(Q, N):
 
 def define_backend(use_noise = False):
     if use_noise:
-            backend_fake = FakeTorino()
+            backend_fake = FakeWashingtonV2()
             noise_model = NoiseModel.from_backend(backend_fake)
-            gpu_instance = AerSimulator(noise_model=noise_model, method="density_matrix", device="GPU")
+            gpu_instance = AerSimulator(noise_model=noise_model, method="statevector", device="GPU")
             gpu_instance.set_options(precision='single')
+            return noise_model, gpu_instance
     else:
             gpu_instance = AerSimulator(method="statevector", device="GPU")
     return gpu_instance
@@ -134,10 +141,29 @@ def cost_func_estimator(params, circuit, estimator, observable):
     objective_func_vals.append(cost_mean_val)
     return cost_mean_val
 
-# ------------------------
+def is_valid(bitstring, neighbors):
+    """
+    Verify if select configuration is ok for observer all networks.
+
+    Parameters:
+    - bitstring: string type '01011'
+    - neighbors: dict {node: [neighbors]}
+
+    Returns:
+    - True / False
+    """
+    for i, val in enumerate(bitstring):
+        if val == '0':
+            # nodo i NON ha PMU → deve essere coperto da almeno un vicino
+            if all(bitstring[j] == '0' for j in neighbors[i]):
+                return False
+    return True
+
+
+'''# ------------------------
 # Run QAOA
 # ------------------------
-def run_qaoa(G, backend, p=2, lambda_penalty=50, maxiter=100):
+def run_qaoa(G, backend, p=2, lambda_penalty=50):
     Q, total_vars = build_qubo_matrix_with_slack(G, lambda_penalty)
     cost_hamiltonian = qubo_to_pauli(Q, total_vars)
 
@@ -175,20 +201,58 @@ def run_qaoa(G, backend, p=2, lambda_penalty=50, maxiter=100):
         final_distribution_bin = {key: val / shots for key, val in counts_bin.items()}
         print('final distribution: ', final_distribution_int)
 
-def is_valid(bitstring, neighbors):
-    """
-    Verifica se una configurazione PMU rende osservabile tutta la rete.
 
-    Parameters:
-    - bitstring: stringa tipo '01011'
-    - neighbors: dict {node: [vicini]}
 
-    Returns:
-    - True / False
-    """
-    for i, val in enumerate(bitstring):
-        if val == '0':
-            # nodo i NON ha PMU → deve essere coperto da almeno un vicino
-            if all(bitstring[j] == '0' for j in neighbors[i]):
-                return False
-    return True
+
+def run_qaoa_evovaq(G, backend, p=2, lambda_penalty=50, max_gen=10):
+    # 1️⃣ Costruisci QUBO e Hamiltonian
+    Q, total_vars = build_qubo_matrix_with_slack(G, lambda_penalty)
+    cost_hamiltonian = qubo_to_pauli(Q, total_vars)
+
+    # 2️⃣ Ansatz QAOA
+    qaoa_ansatz = QAOAAnsatz(cost_operator=cost_hamiltonian, reps=p)
+    qaoa_ansatz.measure_all()
+
+    # 3️⃣ Definisci cost function compatibile con evovaq
+    def cost_function_evovaq(params):
+        with Session(backend=backend) as session:
+            estimator = Estimator(mode=session)
+            estimator.options.default_shots = 0
+            pubs = [(qaoa_ansatz, cost_hamiltonian, params)]
+            result = estimator.run(pubs).result()
+            return result[0].data.evs
+
+    # 4️⃣ Definisci problema evovaq
+    num_params = qaoa_ansatz.num_parameters
+    param_bounds = [(-np.pi, np.pi)] * num_params
+    evovaq_problem = Problem(num_params, param_bounds, cost_function_evovaq)
+
+    # 5️⃣ Ottimizzatore Memetic Algorithm
+    global_search = GA(selection=op.sel_tournament,
+                       crossover=op.cx_uniform,
+                       mutation=op.mut_gaussian,
+                       sigma=0.2, mut_indpb=0.15, cxpb=0.9, tournsize=5)
+
+    def get_neighbour(problem, current_solution):
+        neighbour = current_solution.copy()
+        index = np.random.randint(0, len(current_solution))
+        _min, _max = problem.param_bounds[index]
+        neighbour[index] = np.random.uniform(_min, _max)
+        return neighbour
+
+    #local_search = HC(generate_neighbour=get_neighbour)
+
+    optimizer_evovaq = MA(global_search=global_search.evolve_population,
+                          sel_for_refinement=op.sel_best,
+                          #local_search=local_search.stochastic_var,
+                          frequency=0.1,
+                          intensity=10,
+                          seed=42)
+
+    # 6️⃣ Esegui ottimizzazione
+    res_evovaq = global_search.optimize(evovaq_problem, 10, max_gen=max_gen, verbose=True, seed=42)
+
+    # 7️⃣ Crea circuito ottimizzato
+    optimized_circuit = qaoa_ansatz.assign_parameters(res_evovaq.x)
+
+    return optimized_circuit, res_evovaq'''
