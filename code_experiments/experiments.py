@@ -21,7 +21,9 @@ from evovaq.problem import Problem
 from evovaq.GeneticAlgorithm import GA
 from evovaq.HillClimbing import HC
 from evovaq.MemeticAlgorithm import MA
+from evovaq.ParticleSwarmOptimization import PSO
 import evovaq.tools.operators as op
+from itertools import product
 
 # -----------------------------
 # Funzione di categorizzazione
@@ -326,112 +328,15 @@ def experiment_prob_vs_p_seeds_noise(
         plt.tight_layout()
         plt.savefig(os.path.join(save_dir, f"plot_lambda{l}.pdf"))
 
-# -----------------------------
-# Experiment 4 - EVOVAQ
-# -----------------------------
-
-def experiment_prob_vs_p_evovaq(
-    G,
-    neighbors,
-    is_valid,
-    backend_factory,
-    cost_func_estimator,
-    p_values,
-    lambda_values,
-    min_pm
-):
-    colors = {'optimal':'tab:green', 'feasible':'tab:blue', 'invalid':'tab:red'}
-    N = len(G.nodes)
-    prob_vs_p = defaultdict(lambda: {'optimal':0, 'feasible':0, 'invalid':0})
-
-    start = time.time()
-
-    for l in lambda_values:
-        for p in p_values:
-            print(f"Running EVOVAQ experiment for p={p}, lambda={l}")
-
-            Q, total_vars = build_qubo_matrix_with_slack(G, lambda_penalty=l)
-            cost_hamiltonian = qubo_to_pauli(Q, total_vars)
-
-            qaoa_ansatz = QAOAAnsatz(cost_operator=cost_hamiltonian, reps=p)
-            qaoa_ansatz.measure_all()
-
-            # Definizione cost function compatibile con EVOVAQ
-            def cost_evovaq(params):
-                return cost_func_estimator(params, qaoa_ansatz, backend_factory, cost_hamiltonian)
-
-            num_params = qaoa_ansatz.num_parameters
-            param_bounds = [(-np.pi, np.pi)] * num_params
-            problem = Problem(num_params, param_bounds, cost_evovaq)
-
-            # Configurazione Memetic Algorithm
-            global_search = GA(selection=op.sel_tournament, crossover=op.cx_uniform,
-                               mutation=op.mut_gaussian, sigma=0.2, mut_indpb=0.15,
-                               cxpb=0.9, tournsize=5)
-            '''def get_neighbour(problem, current_solution):
-                neighbour = current_solution.copy()
-                idx = np.random.randint(len(current_solution))
-                _min, _max = problem.param_bounds[0]
-                neighbour[idx] = np.random.uniform(_min, _max)
-                return neighbour'''
-            #local_search = HC(generate_neighbour=get_neighbour)
-            '''optimizer = MA(global_search=global_search.evolve_population,
-                           sel_for_refinement=op.sel_best,
-                           local_search=local_search.stochastic_var,
-                           frequency=0.1, intensity=10)'''
-
-            # Optimization
-            res = global_search.optimize(problem, 10, max_gen=10, verbose=True, seed=42)
-
-            # Optimized circuit
-            optimized_circuit = qaoa_ansatz.assign_parameters(res.x)
-
-            # Sampling
-            with Session(backend=backend_factory) as session:
-                sampler = Sampler(mode=session)
-                sampler.options.default_shots = 0
-                job = sampler.run([optimized_circuit])
-                counts_bin = job.result()[0].data.meas.get_counts()
-
-            total_counts = sum(counts_bin.values())
-            probs = {'optimal':0, 'feasible':0, 'invalid':0}
-            for bs, count in counts_bin.items():
-                cat = categorize_solution(bs[-N:], neighbors, min_pm, is_valid)
-                probs[cat] += count / total_counts
-
-            prob_vs_p[p] = probs
-
-        end_total = time.time()
-        print(f"\nTotal Time : {end_total-start:.2f} sec")
-
-        # Plot
-        plt.figure(figsize=(8,5))
-        for cat in ['optimal','feasible','invalid']:
-            plt.plot(
-                p_values,
-                [prob_vs_p[p][cat] for p in p_values],
-                marker='o',
-                linewidth=2.5,
-                markersize=8,
-                label=cat,
-                color=colors[cat]
-            )
-        plt.xlabel('p')
-        plt.ylabel('Probability to obtain a solution')
-        plt.xticks(p_values)
-        plt.gca().yaxis.set_major_formatter(mtick.PercentFormatter(1))
-        plt.grid(True)
-        plt.legend()
-        plt.savefig(f"plot_evovaq_{l}.pdf")
-
-     
 
 
 # -----------------------------
 # Experiment 5 - Count Two-Qbit Gate after and before transpilation
 # -----------------------------
-def experiment_cx_scaling(G, p_values, lambda_val):
+def experiment_cx_scaling(G, p_values, lambda_val, save_dir="./"):
 
+    os.makedirs(save_dir, exist_ok=True)
+    
     backends = {
         'FakeMelbourneV2': FakeSingaporeV2(),
         'FakeCambridgeV2': FakeCambridgeV2(),
@@ -499,3 +404,193 @@ def experiment_cx_scaling(G, p_values, lambda_val):
     plt.legend()
     plt.tight_layout()
     plt.show()
+
+    
+def compare_optimizers_qar(
+    G,
+    backend_factory,
+    cost_func_estimator,
+    p_values=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],
+    lambda_values=[10,20,50,70],
+    optimizers=['COBYLA', 'Nelder-Mead', 'COBYQA', 'GA', 'PSO', 'Powell'],
+    shots=0,
+    n_runs=5,
+    noise_model=None,
+    save_dir='./'
+):
+    os.makedirs(save_dir, exist_ok=True)
+    N = len(G.nodes)
+
+    # seed per evolutivi
+    np.random.seed(42)   # opzionale, per riproducibilità
+    seeds = np.random.randint(0, 10000, size=n_runs)
+
+    # struttura: optimizer -> p -> lambda -> lista QAR
+    results = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
+
+    for opt in optimizers:
+        print(f"Running optimizer: {opt}")
+
+        for l in lambda_values:
+            for p in p_values:
+                print(f"λ={l}, p={p}")
+
+                # Build QUBO e Hamiltonian
+                Q, total_vars = build_qubo_matrix_with_slack(G, lambda_penalty=l)
+
+                # Convert dict Q in matrice numpy
+                Q_matrix = np.zeros((total_vars, total_vars))
+                for (i,j), val in Q.items():
+                    if isinstance(i,int) and isinstance(j,int):
+                        Q_matrix[i,j] = val
+                        Q_matrix[j,i] = val
+
+                cost_hamiltonian = qubo_to_pauli(Q, total_vars)
+
+                for run in range(n_runs):
+
+                    qaoa_ansatz = QAOAAnsatz(cost_operator=cost_hamiltonian, reps=p)
+                    qaoa_ansatz.measure_all()
+
+                    pm_opts = {'optimization_level':3}
+                    if noise_model is not None:
+                        pm_opts['basis_gates'] = noise_model.basis_gates
+
+                    pm = generate_preset_pass_manager(**pm_opts, backend=backend_factory)
+                    qaoa_ansatz = pm.run(qaoa_ansatz)
+
+                    init_params = np.random.rand(qaoa_ansatz.num_parameters) * np.pi
+
+                    # -------- SEED handling --------
+                    if opt in ['GA','PSO']:
+                        seed = seeds[run]  # un seed diverso per ogni run
+                    else:
+                        seed = None
+
+                    # -------- OPTIMIZATION --------
+                    if opt in ['COBYLA', 'Nelder-Mead', 'COBYQA', 'Powell']:
+                        with Session(backend=backend_factory) as session:
+                            estimator = Estimator(mode=session)
+                            estimator.options.default_shots = shots
+
+                            result = minimize(
+                                cost_func_estimator,
+                                init_params,
+                                args=(qaoa_ansatz, estimator, cost_hamiltonian),
+                                method=opt,
+                                options={'maxiter':50, 'disp':False}
+                            )
+                        params_opt = result.x
+
+                    elif opt == 'GA':
+                        def cost_evovaq(params):
+                            return cost_func_estimator(params, qaoa_ansatz, backend_factory, cost_hamiltonian)
+
+                        problem = Problem(
+                            qaoa_ansatz.num_parameters,
+                            [(-np.pi, np.pi)]*qaoa_ansatz.num_parameters,
+                            cost_evovaq
+                        )
+
+                        global_search = GA(
+                            selection=op.sel_tournament,
+                            crossover=op.cx_uniform,
+                            mutation=op.mut_gaussian,
+                            sigma=0.2,
+                            mut_indpb=0.15,
+                            cxpb=0.9,
+                            tournsize=5
+                        )
+
+                        res = global_search.optimize(
+                            problem,
+                            10,
+                            max_gen=10,
+                            verbose=False,
+                            seed=seed
+                        )
+                        params_opt = res.x
+
+                    elif opt == 'PSO':
+                        def cost_evovaq(params):
+                            return cost_func_estimator(params, qaoa_ansatz, backend_factory, cost_hamiltonian)
+
+                        problem = Problem(
+                            qaoa_ansatz.num_parameters,
+                            [(-np.pi, np.pi)]*qaoa_ansatz.num_parameters,
+                            cost_evovaq
+                        )
+
+                        optimizer = PSO(
+                            vmin=-1.0,
+                            vmax=1.0
+                        )
+
+                        res = optimizer.optimize(
+                            problem,
+                            10,
+                            max_gen=10,
+                            verbose=False,
+                            seed=seed
+                        )
+                        params_opt = res.x
+
+                    # -------- SAMPLING --------
+                    optimized_circuit = qaoa_ansatz.assign_parameters(params_opt)
+
+                    with Session(backend=backend_factory) as session:
+                        sampler = Sampler(mode=session)
+                        sampler.options.default_shots = shots
+                        job = sampler.run([optimized_circuit])
+                        counts_bin = job.result()[0].data.meas.get_counts()
+
+                    # -------- QAR dai counts --------
+                    total_counts = sum(counts_bin.values())
+                    expected_value = 0.0
+
+                    for bs, count in counts_bin.items():
+                        x = np.array([int(b) for b in bs[-total_vars:]])
+                        expected_value += (x.T @ Q_matrix @ x) * (count / total_counts)
+
+                    # minimo globale QUBO
+                    if total_vars <= 16:
+                        all_x = np.array(list(product([0,1], repeat=total_vars)))
+                        Cmin = np.min(np.sum(all_x @ Q_matrix * all_x, axis=1))
+                    else:
+                        def qubo_cost(x):
+                            x_bin = np.array(x).round()
+                            return x_bin.T @ Q_matrix @ x_bin
+                        res_min = minimize(qubo_cost, np.random.rand(total_vars), method='COBYLA')
+                        Cmin = qubo_cost(res_min.x)
+
+                    qar = Cmin / expected_value  # minimizzazione
+                    results[opt][p][l].append(qar)
+
+    # ===============================
+    # BEST λ per p e media sulle run
+    # ===============================
+    final_data = {}
+    for opt in optimizers:
+        qar_per_p = []
+        for p in p_values:
+            lambda_means = [np.mean(results[opt][p][l]) for l in lambda_values]
+            best_lambda_val = max(lambda_means)  # best λ per questo p
+            qar_per_p.append(best_lambda_val)
+        final_data[opt] = qar_per_p
+
+    # ===============================
+    # BOXPLOT
+    # ===============================
+    plt.figure(figsize=(10,6))
+    data = [final_data[opt] for opt in optimizers]
+    box = plt.boxplot(data, labels=optimizers)
+    for median in box['medians']:
+        median.set_linewidth(2.5)
+
+    plt.ylabel('Quantum Approximation Ratio')
+    plt.grid(True, axis='y')
+    plt.tight_layout()
+    plt.savefig(os.path.join(save_dir, f"optimizer_comparison_{shots}_nonoise.pdf"))
+    plt.show()
+
+    return final_data
