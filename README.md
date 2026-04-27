@@ -8,7 +8,7 @@ The work investigates how different problem formulations (QUBO, PUBO, and relaxe
 
 ---
 
-| Sparse Graph | QAOA Architecture |
+| Sparse Graph | Graph-Aware QAOA Architecture |
 |-------------|------------------|
 | ![Sparse Graph](sparse_dense_graph.png) | ![QAOA Architecture](qaoa_graph_aware_mixer.png) |
 
