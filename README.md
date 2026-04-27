@@ -80,9 +80,10 @@ Two mixing strategies are studied:
 
 ## 📊 Graph Instances
 
-- IEEE-inspired power system networks
-- Sizes: 5, 9, 14, 24, 30, 39, 57, 118 buses
-- Sparse graph structure dominates all instances
+-IEEE-inspired power system networks
+-Network sizes considered: 5, 9, 14, 24, 30, 39, 57, 118 buses
+-Experimental evaluation focused on 5, 9, and 24-bus systems
+-All instances exhibit sparse connectivity typical of power grid topologies
 
 
 
