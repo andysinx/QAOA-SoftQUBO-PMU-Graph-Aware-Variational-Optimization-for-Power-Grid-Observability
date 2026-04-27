@@ -15,7 +15,7 @@ Key challenges include:
 This study emphasizes that **formulation matters more than the optimization algorithm**, exploring how better encodings allow larger networks to be tackled efficiently.
 | Sparse Graph | QAOA Architecture |
 |-------------|------------------|
-| ![Sparse Graph](sparse_dense_graph.png) | ![QAOA Architecture](qaoa_view.png) |
+| ![Sparse Graph](sparse_dense_graph.png) | ![QAOA Architecture](qaoa_graph_aware_mixer.png) |
 
 
 
