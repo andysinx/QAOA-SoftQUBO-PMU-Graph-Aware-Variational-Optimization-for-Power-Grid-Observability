@@ -171,11 +171,11 @@ python code_experiments/Relaxed_QUBO_Graph_Aware_Mixer_vs_Standard_Mixer/relaxed
 python code_experiments/Relaxed_QUBO_Graph_Aware_Mixer_vs_Standard_Mixer/relaxed_PUBO_stdmixer.py
 ```
 ###  📈 Key Contributions
-📌 Unified framework for QUBO, PUBO, and relaxed formulations
-📌 Soft penalty relaxation of observability constraints
-📌 Graph-aware QAOA mixer with topology-dependent dynamics
-📌 Full analysis under noise, sampling, and hardware constraints
-📌 Large-scale experiments up to 24-node power networks
+- 📌 Unified framework for QUBO, PUBO, and relaxed formulations
+- 📌 Soft penalty relaxation of observability constraints
+- 📌 Graph-aware QAOA mixer with topology-dependent dynamics
+- 📌 Full analysis under noise, sampling, and hardware constraints
+- 📌 Large-scale experiments up to 24-node power networks
 
 ###  🧩 Main Takeaway
 - PUBO reduces qubits but increases optimization hardness
