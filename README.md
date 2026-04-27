@@ -1,8 +1,11 @@
 # ⚡🧠📊 QAOA-SoftQUBO-PMU: Graph-Aware Variational Optimization for PMU Placement ⚛️💻
 
+### 📌 Reference
+
 This repository contains the full experimental framework supporting the study:
 
-**“Soft-QUBO Relaxations with Graph-Aware QAOA for PMU Placement”**
+- **“G. Acampora, E. Esposito, N. Paterakis, A. Senese. Soft-QUBO Relaxations with Graph-Aware QAOA for PMU Placement.”**
+
 
 The work investigates how different problem formulations (QUBO, PUBO, and relaxed penalty-based QUBO) and different QAOA mixing strategies (standard vs graph-aware) affect performance, scalability, and noise robustness in the **Optimal PMU Placement problem** for power systems.
 
@@ -185,12 +188,6 @@ python code_experiments/Relaxed_QUBO_Graph_Aware_Mixer_vs_Standard_Mixer/relaxed
 - QUBO increases circuit complexity due to slack-variable encoding  
 - Soft-QUBO provides a better trade-off between expressiveness and trainability  
 - Graph-aware mixers improve stability and feasibility under noise  
-
-### 📌 Reference
-
-This repository supports the paper:
-
-- G. Acampora, E. Esposito, N. Paterakis, A. Senese. Soft-QUBO Relaxations with Graph-Aware QAOA for PMU Placement.
 
 ### ⚙️ Implementation Notes
 - Built with Qiskit v1.2.4 + Pennylane
