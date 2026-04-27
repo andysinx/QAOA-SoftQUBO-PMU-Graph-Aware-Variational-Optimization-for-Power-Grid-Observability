@@ -1,5 +1,13 @@
 # ⚡🧠📊 QAOA-SoftQUBO-PMU: Graph-Aware Variational Optimization for PMU Placement ⚛️💻
 
+---
+
+| Sparse Graph | Graph-Aware QAOA Architecture |
+|-------------|------------------|
+| ![Sparse Graph](sparse_dense_graph.png) | ![QAOA Architecture](qaoa_graph_aware_mixer.png) |
+
+---
+
 ### 📌 Reference
 
 This repository contains the full experimental framework supporting the study:
@@ -72,12 +80,6 @@ Two mixing strategies are studied:
 - Two-body XX interactions aligned with graph edges
 - Encodes topology into variational dynamics
 - Induces correlated evolution of qubits
-
----
-
-| Sparse Graph | Graph-Aware QAOA Architecture |
-|-------------|------------------|
-| ![Sparse Graph](sparse_dense_graph.png) | ![QAOA Architecture](qaoa_graph_aware_mixer.png) |
 
 ---
 
