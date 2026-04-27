@@ -11,12 +11,6 @@ The work investigates how different problem formulations (QUBO, PUBO, and relaxe
 
 ---
 
-| Sparse Graph | Graph-Aware QAOA Architecture |
-|-------------|------------------|
-| ![Sparse Graph](sparse_dense_graph.png) | ![QAOA Architecture](qaoa_graph_aware_mixer.png) |
-
----
-
 ## 🌍 Motivation
 
 Modern power grids are sparse and highly structured, making them ideal benchmarks for studying quantum optimization methods.
@@ -78,6 +72,12 @@ Two mixing strategies are studied:
 - Two-body XX interactions aligned with graph edges
 - Encodes topology into variational dynamics
 - Induces correlated evolution of qubits
+
+---
+
+| Sparse Graph | Graph-Aware QAOA Architecture |
+|-------------|------------------|
+| ![Sparse Graph](sparse_dense_graph.png) | ![QAOA Architecture](qaoa_graph_aware_mixer.png) |
 
 ---
 
