@@ -36,9 +36,9 @@ This study emphasizes that:
 
 We show that:
 
-- Better encodings significantly improve trainability
-- Graph-aware mixers introduce topology-driven correlations in the quantum dynamics
-- Relaxed penalty formulations smooth the optimization landscape
+- Better encodings improve optimization stability and convergence  
+- Graph-aware mixers introduce topology-induced correlations in QAOA dynamics  
+- Relaxed penalty formulations smooth the optimization landscape 
 
 ---
 
@@ -80,10 +80,10 @@ Two mixing strategies are studied:
 
 ## 📊 Graph Instances
 
--IEEE-inspired power system networks
--Network sizes considered: 5, 9, 14, 24, 30, 39, 57, 118 buses
--Experimental evaluation focused on 5, 9, and 24-bus systems
--All instances exhibit sparse connectivity typical of power grid topologies
+- IEEE-inspired power system networks  
+- Network sizes considered: 5, 9, 14, 24, 30, 39, 57, 118 buses  
+- Experimental evaluation focuses on 5, 9, and 24-bus systems  
+- All instances exhibit sparse connectivity typical of power grids  
 
 
 
@@ -157,7 +157,9 @@ Clone repository
 ```
 git clone https://github.com/your-repo/qaoa-pmu-study.git
 cd qaoa-pmu-study
+```
 Install dependencies
+```
 pip install -r requirements.txt
 Run experiments
 ```
@@ -179,10 +181,10 @@ python code_experiments/Relaxed_QUBO_Graph_Aware_Mixer_vs_Standard_Mixer/relaxed
 - 📌 Large-scale experiments up to 24-node power networks
 
 ###  🧩 Main Takeaway
-- PUBO reduces qubits but increases optimization hardness
-- QUBO increases circuit overhead due to slack variables
-- Soft-QUBO provides a better balance between structure and trainability
-- Graph-aware mixers improve stability and feasibility under noise
+- PUBO reduces qubit overhead but increases optimization hardness due to higher-order interactions  
+- QUBO increases circuit complexity due to slack-variable encoding  
+- Soft-QUBO provides a better trade-off between expressiveness and trainability  
+- Graph-aware mixers improve stability and feasibility under noise  
 
 ### 📌 Reference
 
