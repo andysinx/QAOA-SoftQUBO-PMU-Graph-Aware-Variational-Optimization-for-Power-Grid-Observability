@@ -182,7 +182,8 @@ python code_experiments/Relaxed_QUBO_Graph_Aware_Mixer_vs_Standard_Mixer/relaxed
 - QUBO increases circuit overhead due to slack variables
 - Soft-QUBO provides a better balance between structure and trainability
 - Graph-aware mixers improve stability and feasibility under noise
-📌 Reference
+
+### 📌 Reference
 
 ### This repository supports the paper:
 
