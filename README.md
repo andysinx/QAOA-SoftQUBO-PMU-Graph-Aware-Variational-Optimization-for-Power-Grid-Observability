@@ -188,7 +188,7 @@ python code_experiments/Relaxed_QUBO_Graph_Aware_Mixer_vs_Standard_Mixer/relaxed
 
 ### 📌 Reference
 
-### This repository supports the paper:
+This repository supports the paper:
 
 - G. Acampora, E. Esposito, N. Paterakis, A. Senese. Soft-QUBO Relaxations with Graph-Aware QAOA for PMU Placement.
 
