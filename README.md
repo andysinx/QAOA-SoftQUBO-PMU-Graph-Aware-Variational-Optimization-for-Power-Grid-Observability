@@ -170,24 +170,25 @@ Relaxed QUBO with graph-aware mixer/standard mixer:
 python code_experiments/Relaxed_QUBO_Graph_Aware_Mixer_vs_Standard_Mixer/relaxed_PUBO_gamixer.py
 python code_experiments/Relaxed_QUBO_Graph_Aware_Mixer_vs_Standard_Mixer/relaxed_PUBO_stdmixer.py
 ```
-📈 Key Contributions
+###  📈 Key Contributions
 📌 Unified framework for QUBO, PUBO, and relaxed formulations
 📌 Soft penalty relaxation of observability constraints
 📌 Graph-aware QAOA mixer with topology-dependent dynamics
 📌 Full analysis under noise, sampling, and hardware constraints
 📌 Large-scale experiments up to 24-node power networks
-🧩 Main Takeaway
-PUBO reduces qubits but increases optimization hardness
-QUBO increases circuit overhead due to slack variables
-Soft-QUBO provides a better balance between structure and trainability
-Graph-aware mixers improve stability and feasibility under noise
+
+###  🧩 Main Takeaway
+- PUBO reduces qubits but increases optimization hardness
+- QUBO increases circuit overhead due to slack variables
+- Soft-QUBO provides a better balance between structure and trainability
+- Graph-aware mixers improve stability and feasibility under noise
 📌 Reference
 
-This repository supports the paper:
+### This repository supports the paper:
 
-G. Acamporaa, E. Esposito, N. Paterakis, A. Senese - Soft-QUBO Relaxations with Graph-Aware QAOA for PMU Placement.
+- G. Acamporaa, E. Esposito, N. Paterakis, A. Senese - Soft-QUBO Relaxations with Graph-Aware QAOA for PMU Placement.
 
-⚙️ Implementation Notes
-Built with Qiskit v1.2.4 + Pennylane
-Noise simulations: FakeWashingtonV2
-Large-scale runs executed with GPU acceleration (lightning.gpu)
+### ⚙️ Implementation Notes
+- Built with Qiskit v1.2.4 + Pennylane
+- Noise simulations: FakeWashingtonV2
+- Large-scale runs executed with GPU acceleration (lightning.gpu)
