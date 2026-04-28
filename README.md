@@ -4,7 +4,7 @@
 
 | Sparse Graph | Graph-Aware QAOA Architecture |
 |-------------|------------------|
-| ![Sparse Graph](sparse_dense_graph.png) | ![QAOA Architecture](qaoa_gr_aw.svg) |
+| ![Sparse Graph vs Fully Connected](sparse_dense_graph.png) | ![QAOA Architecture](qaoa_gr_aw.svg) |
 
 ---
 
