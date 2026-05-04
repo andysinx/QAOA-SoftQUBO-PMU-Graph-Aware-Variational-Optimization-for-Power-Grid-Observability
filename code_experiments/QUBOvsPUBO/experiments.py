@@ -363,7 +363,8 @@ def experiment_cx_scaling(G, p_values, lambda_val=None, save_dir="./experiments/
         # Costruzione circuito
         '''Q, total_vars = build_qubo_matrix_with_slack(G, lambda_penalty=lambda_val) 
         cost_hamiltonian = qubo_to_pauli(Q, total_vars)'''
-        P, N, _ = build_pubo_hybrid(G)
+        P = build_pubo_native(G)
+        N = len(G.nodes)
         cost_hamiltonian = pubo_to_pauli(P, N)
 
         qaoa_ansatz = QAOAAnsatz(cost_operator=cost_hamiltonian, reps=p)
